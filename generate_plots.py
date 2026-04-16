@@ -10,6 +10,7 @@ Usage
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def generate_data(seed):
@@ -73,3 +74,46 @@ def plot_scatter(sensor_a, sensor_b, timestamps, ax):
     ax.legend()
     ax.grid(True)
     return None
+
+def main():
+    sensor_a, sensor_b, timestamps = generate_data(seed=9811)
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    plot_scatter(sensor_a, sensor_b, timestamps, axes[0, 0])
+
+    axes[0, 1].hist(sensor_a, bins=30, alpha=0.5, color='tab:blue', label='Sensor A')
+    axes[0, 1].hist(sensor_b, bins=30, alpha=0.5, color='tab:orange', label='Sensor B')
+    axes[0, 1].axvline(sensor_a.mean(), color='tab:blue', linestyle='--', linewidth=1.5, label='Sensor A mean')
+    axes[0, 1].axvline(sensor_b.mean(), color='tab:orange', linestyle='--', linewidth=1.5, label='Sensor B mean')
+    axes[0, 1].set_xlabel('Temperature (°C)')
+    axes[0, 1].set_ylabel('Count')
+    axes[0, 1].set_title('Overlaid temperature distributions')
+    axes[0, 1].legend()
+    axes[0, 1].grid(True)
+
+    axes[1, 0].boxplot([sensor_a, sensor_b], labels=['Sensor A', 'Sensor B'], patch_artist=True,
+                       boxprops=dict(facecolor='lightgray', color='black'),
+                       medianprops=dict(color='red'))
+    axes[1, 0].set_title('Sensor temperature box plots')
+    axes[1, 0].set_ylabel('Temperature (°C)')
+    axes[1, 0].grid(True, axis='y')
+
+    axes[1, 1].axis('off')
+    summary_text = (
+        f"Sensor A mean: {sensor_a.mean():.2f} °C\n"
+        f"Sensor A std: {sensor_a.std(ddof=1):.2f} °C\n\n"
+        f"Sensor B mean: {sensor_b.mean():.2f} °C\n"
+        f"Sensor B std: {sensor_b.std(ddof=1):.2f} °C"
+    )
+    axes[1, 1].text(0.02, 0.98, 'Summary statistics', transform=axes[1, 1].transAxes,
+                    fontsize=12, fontweight='bold', va='top')
+    axes[1, 1].text(0.02, 0.78, summary_text, transform=axes[1, 1].transAxes,
+                    fontsize=10, va='top')
+
+    fig.tight_layout()
+    fig.savefig('sensor_plots_grid.png', dpi=300)
+    plt.close(fig)
+
+
+if __name__ == '__main__':
+    main()
